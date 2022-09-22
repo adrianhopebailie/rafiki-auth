@@ -15,17 +15,16 @@ export default class AccessToken extends BaseModel {
   @column({ isPrimary: true })
   public id: string
 
-  @column() // Not Nullable - Unique
+  @column()
   public value: string
 
-  @column() // Not Nullable - Unique - UUID
-  public managementId: string
-
-  @column() // Not Nullable
+  @column()
   public expiresIn: number
 
-  // Relations
+  @column.dateTime()
+  public revokedAt: DateTime
 
+  // Relations
   @column()
   public grantId: string
 
@@ -33,7 +32,6 @@ export default class AccessToken extends BaseModel {
   public grant: BelongsTo<typeof Grant>
 
   // Timestamp
-
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime
 

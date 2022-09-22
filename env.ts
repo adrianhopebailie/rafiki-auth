@@ -23,6 +23,9 @@ export default Env.rules({
 
   DB_CONNECTION: Env.schema.string(),
 
+  GNAP_GRANT_DEFAULT_WAIT: Env.schema.number(),
+  GNAP_GRANT_INTERACT_REDIRECT: Env.schema.boolean(),
+
   PG_HOST: Env.schema.string({ format: 'host' }),
   PG_PORT: Env.schema.number(),
   PG_USER: Env.schema.string(),

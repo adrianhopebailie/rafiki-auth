@@ -11,20 +11,16 @@ export default class extends BaseSchema {
       table.uuid('client_id').references('id').inTable('clients').onDelete('CASCADE')
 
       table.string('state').notNullable()
-      table.specificType('start_method', 'text[]').notNullable()
+      table.specificType('supported_start_methods', 'text[]').notNullable()
   
-      table.string('continue_id').unique()
-      table.string('continue_token')
+      table.string('continue_token').unique()
       table.integer('wait')
   
-      table.string('finish_method').notNullable()
-      table.string('finish_uri').notNullable()
-
-      table.string('client_nonce').notNullable()
+      table.string('finish_method')
+      table.string('finish_uri')
+      table.string('finish_nonce')
   
-      table.string('interact_id').notNullable().unique()
-      table.string('interact_ref').notNullable()
-      table.string('interact_nonce').notNullable()
+      table.string('interact_nonce')
   
       table.timestamp('created_at', { useTz: true })
       table.timestamp('updated_at', { useTz: true })

@@ -15,9 +15,24 @@
 
 import Logger from '@ioc:Adonis/Core/Logger'
 import HttpExceptionHandler from '@ioc:Adonis/Core/HttpExceptionHandler'
+import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import { isGnapException } from './GnapException'
 
 export default class ExceptionHandler extends HttpExceptionHandler {
   constructor() {
     super(Logger)
+  }
+
+  public override async handle(error: any, ctx: HttpContextContract): Promise<any> {
+
+    if(isGnapException(error)) {
+        return ctx.response.status(error.status).send({
+            error: error.errorCode,
+            error_description: error.message
+        })
+    }
+
+    return super.handle(error, ctx)
+
   }
 }

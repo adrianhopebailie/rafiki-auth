@@ -1,44 +1,59 @@
 import { BaseCommand } from '@adonisjs/core/build/standalone'
+import { GrantState } from '../app/Models/Grant'
+import { AccessType, FinishMethod, ResourceAction, StartMethod } from '../providers/Gnap/types'
 
 export default class Debug extends BaseCommand {
-  /**
-   * Command name is used to run the command
-   */
-  public static commandName = 'debug'
+    public static commandName = 'debug'
+    public static description = 'Executes random code in the Debug.ts file'
 
-  /**
-   * Command description is displayed in the "help" output
-   */
-  public static description = 'Executes random code in the Debug.ts file'
+    public static settings = {
+        loadApp: true,
+        stayAlive: false,
+    }
 
-  public static settings = {
-    /**
-     * Set the following value to true, if you want to load the application
-     * before running the command. Don't forget to call `node ace generate:manifest` 
-     * afterwards.
-     */
-    loadApp: true,
+    public async run() {
+        this.logger.info('Starting debug script...')
 
-    /**
-     * Set the following value to true, if you want this command to keep running until
-     * you manually decide to exit the process. Don't forget to call 
-     * `node ace generate:manifest` afterwards.
-     */
-    stayAlive: false,
-  }
+        const { default: Client } = await import('../app/Models/Client')
+        const { default: Grant } = await import('../app/Models/Grant')
+        const { default: Database } = await import('@ioc:Adonis/Lucid/Database')
 
-  public async run() {
-    const { default: Client} = await import ('../app/Models/Client')
-    const test = await Client.query()
-      .preload('keys')
-      // .preload('grants')
-      .whereHas('grants', (grantsQuery) => {
-        grantsQuery
-          .where('continue_id', '8f844308-be86-4c1b-b6a6-9f7910e8ac6c')
-          .where('continue_token', 'CONTINUE-1')
-      })
-      .first()
-      
-    console.log(test)
-  }
+        const client = await Client.query()
+            .preload('keys')
+            .firstOrFail()
+
+        this.logger.info(JSON.stringify(client))
+
+        const trx = await Database.transaction()
+
+        const grant = new Grant()
+            .fill({
+                state: GrantState.Processing,
+                supportedStartMethods: [StartMethod.Redirect],
+
+                finishMethod: FinishMethod.Redirect,
+            })
+            .refreshContinueToken()
+
+        await client
+            .useTransaction(trx)
+            .related('grants')
+            .save(grant)
+
+
+        const accesses = await grant
+            .useTransaction(trx)
+            .related('accesses')
+            .createMany([{
+                actions: [ResourceAction.Create],
+                type: AccessType.OutgoingPayment,
+                locations: ['']
+            }])
+
+        await trx.commit()
+
+
+        this.logger.info(JSON.stringify(accesses))
+
+    }
 }

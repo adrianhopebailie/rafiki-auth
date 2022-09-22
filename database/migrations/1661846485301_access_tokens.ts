@@ -7,11 +7,10 @@ export default class extends BaseSchema {
     this.schema.createTable(this.tableName, (table) => {
       table.uuid('id').notNullable().primary()
       table.uuid('grant_id').references('id').inTable('grants')
-
       table.string('value').notNullable().unique()
-      table.uuid('management_id').notNullable().unique()
       table.integer('expires_in').notNullable()
-  
+      table.timestamp('revoked_at', { useTz: true })
+
       table.timestamp('created_at', { useTz: true })
       table.timestamp('updated_at', { useTz: true })
 

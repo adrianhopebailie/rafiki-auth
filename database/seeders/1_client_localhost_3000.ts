@@ -1,8 +1,8 @@
-import { v4 as uuid } from 'uuid'
 import BaseSeeder from '@ioc:Adonis/Lucid/Seeder'
 import Client from '../../app/Models/Client'
-import { FinishMethod, GrantState, StartMethod } from '../../app/Models/Grant'
-import { AccessType, Action } from '../../app/Models/GrantAccess'
+import { DateTime,  } from 'luxon'
+import { GrantState} from '../../app/Models/Grant'
+import { StartMethod, FinishMethod, AccessType, ResourceAction } from '../../providers/Gnap/types'
 
 export default class extends BaseSeeder {
 
@@ -14,64 +14,57 @@ export default class extends BaseSeeder {
     })
 
     const grants = await client.related('grants').createMany([{
-        state: GrantState.Granted,
-        startMethod: [StartMethod.Redirect],
+        state: GrantState.Approved,
+        supportedStartMethods: [StartMethod.Redirect],
         finishMethod: FinishMethod.Redirect,
         finishUri: 'https://example.com/finish',
-        clientNonce: 'example-client-nonce',
-        interactId: uuid(),
-        interactRef: 'exmaple-interact-ref',
+        finishNonce: 'example-client-nonce',
         interactNonce: 'example-interact-nonce',
         continueToken: 'CONTINUE-1',
-        continueId: uuid()
     }, {
-      state: GrantState.Granted,
-      startMethod: [StartMethod.Redirect],
+      state: GrantState.Approved,
+      supportedStartMethods: [StartMethod.Redirect],
       finishMethod: FinishMethod.Redirect,
       finishUri: 'http://peer-auth:3006/finish',
-      clientNonce: 'example-client-nonce',
-      interactId: uuid(),
-      interactRef: 'local-bank-interact-ref',
+      finishNonce: 'example-client-nonce',
       interactNonce: 'local-bank-interact-nonce',
       continueToken: 'CONTINUE-2',
-      continueId: uuid()
   }])
 
     grants[0].related('accesses').createMany([{
       type: AccessType.IncomingPayment,
-      actions: [Action.Create, Action.Read, Action.List],
+      actions: [ResourceAction.Create, ResourceAction.Read, ResourceAction.List],
     },
     {
       type: AccessType.OutgoingPayment,
-      actions: [Action.Create, Action.Read, Action.List],
+      actions: [ResourceAction.Create, ResourceAction.Read, ResourceAction.List],
     },
     {
       type: AccessType.Quote,
-      actions: [Action.Create, Action.Read],
+      actions: [ResourceAction.Create, ResourceAction.Read],
     }])
 
     grants[1].related('accesses').createMany([{
       type: AccessType.IncomingPayment,
-      actions: [Action.Create, Action.Read, Action.List],
+      actions: [ResourceAction.Create, ResourceAction.Read, ResourceAction.List],
     },
     {
       type: AccessType.OutgoingPayment,
-      actions: [Action.Create, Action.Read, Action.List],
+      actions: [ResourceAction.Create, ResourceAction.Read, ResourceAction.List],
     },
     {
       type: AccessType.Quote,
-      actions: [Action.Create, Action.Read],
+      actions: [ResourceAction.Create, ResourceAction.Read],
     }])
 
     grants[0].related('accessTokens').create({
       value: 'ACCESS-TOKEN-1',
-      managementId: uuid(),
       expiresIn: 100000000,
+      revokedAt: DateTime.now()
     })
 
     grants[1].related('accessTokens').create({
       value: 'ACCESS-TOKEN-2',
-      managementId: uuid(),
       expiresIn: 100000000,
     })
 

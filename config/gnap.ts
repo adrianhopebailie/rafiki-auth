@@ -1,5 +1,7 @@
+import Env from '@ioc:Adonis/Core/Env'
 import { GnapIdentifyClientConfig } from '../app/Middleware/GnapIdentifyClient'
 import { GnapSignatureValidationConfig } from '../app/Middleware/GnapSignatureValidation'
+import { StartMethod } from '../app/Services/types'
  
  /*
  |--------------------------------------------------------------------------
@@ -20,22 +22,22 @@ import { GnapSignatureValidationConfig } from '../app/Middleware/GnapSignatureVa
       init: {
         method: 'body',
       },
-      // TODO - This and the middleware implementation needs to be reviewed
       token: {
         method: 'token',
-        dbIdColumnName: 'interact_id',
         dbTokenColumnName: 'continue_token',
-        parameterName: 'interact'
-      },
-      continue: {
-        method: 'token',
-        dbIdColumnName: 'continue_id',
-        dbTokenColumnName: 'continue_token',
-        parameterName: 'continue'
       }
     },
    },
  }
+
+ export const gnapGrantConfig = {
+    supportedInteractMethods: Env.get('GNAP_GRANT_INTERACT_METHODS', [StartMethod.Redirect]),
+    defaultWait: Env.get('GNAP_GRANT_DEFAULT_WAIT', 15)
+ }
+
+ export const gnapClientConfig = {
+ }
+
  export default gnapConfig
  
  type GnapConfig = {

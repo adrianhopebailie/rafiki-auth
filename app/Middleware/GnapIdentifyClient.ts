@@ -15,8 +15,6 @@ type GnapIdentifyClientByIdConfig = {
 
 type GnapIdentifyClientByTokenConfig = {
   method: 'token'
-  parameterName: string
-  dbIdColumnName: string
   dbTokenColumnName: string
 }
 
@@ -50,17 +48,12 @@ export default class GnapIdentifyClient {
           // TODO - use the right error type
           throw new Error('No token')
         }
-        const parameterValue = ctx.request.param(config.parameterName)
-        if (!parameterValue) {
-          // TODO - use the right error type
-          throw new Error(`Parameter '${config.parameterName}' not found. Check middleware config for this route.`)
-        }
 
         ctx.client = await Client.query()
           .preload('keys')
+          .preload('grants')
           .whereHas('grants', (grantsQuery) => {
             grantsQuery
-              .where(config.dbIdColumnName, parameterValue)
               .where(config.dbTokenColumnName, token)
           })
           .first()

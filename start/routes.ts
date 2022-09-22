@@ -35,26 +35,34 @@ Route.group(() => {
  * These routes handle the GNAP protocol
  */
 Route.group(() => {
-  Route.post('/', 'GnapController.requestGrant')
+  Route.post('/', 'GrantController.requestGrant')
+  .as('createRequest')
   .middleware('client:init')
   .middleware('signature')
 
   Route.group(() => {
-    Route.post('/continue/:id', 'GnapController.continueGrant')
-    Route.patch('/continue/:id', 'GnapController.updateGrant')
-    Route.delete('/continue/:id', 'GnapController.revokeGrant')
+    Route.post('/continue/:id', 'GrantController.continueGrant')
+    .as('continueRequest')
+    Route.patch('/continue/:id', 'GrantController.updateGrant')
+    .as('updateRequest')
+    Route.delete('/continue/:id', 'GrantController.revokeGrant')
+    .as('revokeRequest')
   })
   .middleware('client:continue')
   .middleware('signature')
 
-  Route.post('/token/:id', 'GnapController.rotateToken' )
-  Route.delete('/token/:id', 'GnapController.revokeToken' )
+  Route.group(() => {
+    Route.post('/token/:id', 'TokenController.rotateToken' )
+    .as('rotateToken')
+    Route.delete('/token/:id', 'TokenController.revokeToken' )
+    .as('revokeToken')
+  })
   .middleware('client:token')
   .middleware('signature')
-
 })
 .middleware('json-only')
 .prefix('/gnap')
+.as('gnap')
 .namespace('App/Controllers/Http/Gnap')
 
 /**
@@ -81,5 +89,3 @@ Route.group(() => {
 })
 .prefix('/introspect')
 .namespace('App/Controllers/Http/ResourceServer')
-
-
